@@ -13,6 +13,11 @@ leavesCount :: Rose a -> Int
 leavesCount (Node _ []) = 1
 leavesCount (Node x ys) = foldl (\acc y -> acc + leavesCount y) 0 ys
 
+elemsOnDepth :: Int -> Rose a -> [a]
+elemsOnDepth 0 (Node x _) = [x]
+elemsOnDepth _ (Node x []) = []
+elemsOnDepth num (Node x (y:ys)) = elemsOnDepth (num - 1) y ++ elemsOnDepth num (Node x ys)
+
 rose = Node 5 [
   Node 4 [],
   Node 3 [], 
