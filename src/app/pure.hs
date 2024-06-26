@@ -1,3 +1,4 @@
+
 data Rose a = Node a [Rose a] deriving (Eq, Show)
 
 size :: Rose a -> Int
@@ -17,6 +18,11 @@ elemsOnDepth :: Int -> Rose a -> [a]
 elemsOnDepth 0 (Node x _) = [x]
 elemsOnDepth _ (Node x []) = []
 elemsOnDepth num (Node x (y:ys)) = elemsOnDepth (num - 1) y ++ elemsOnDepth num (Node x ys)
+
+foldRose :: (a -> b -> a) -> a -> Rose b -> a
+foldRose f acc (Node x []) = f acc x 
+foldRose f acc (Node x (y:ys)) = foldRose f newAcc (Node x ys)
+  where newAcc = foldRose f acc y
 
 rose = Node 5 [
   Node 4 [],
