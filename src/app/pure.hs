@@ -5,9 +5,10 @@ instance Functor Rose where
   fmap f (Node x list) = Node (f x) [fmap f y | y <- list]
 
 size :: Rose a -> Int
-size (Node _ []) = 1
-size (Node x (y:ys)) = size y + size (Node x ys)
--- size (Node x ys) = foldl  (\acc y -> acc + size y) 1 ys
+size (Node x ys) = foldl  (\acc y -> acc + size y) 1 ys
+-- size (Node _ []) = 1
+-- size (Node x (y:ys)) = size y + size (Node x ys)
+
 
 height :: Rose a -> Int
 height (Node _ []) = 1
@@ -27,6 +28,10 @@ foldRose f acc (Node x list) = foldl (foldRose f) (f acc x) list
 -- foldRose f acc (Node x []) = f acc x 
 -- foldRose f acc (Node x (y:ys)) = foldRose f newAcc (Node x ys)
 --   where newAcc = foldRose f acc y
+
+generateRose :: a -> Int -> (a -> [a]) -> Rose a
+generateRose root 0 fs = Node root []
+generateRose root depth f = Node root [ generateRose newRoot (depth - 1) f | newRoot <- f root ]
 
 rose = Node 5 [
   Node 4 [],
@@ -49,3 +54,5 @@ rose2 = Node 8 [
   ]
 
 rose3 = Node "yoo, " [Node "hi" [Node "how" [], Node "are" []]]
+
+a = (\x->[[x+1],[x+2],[x+3]]) 5
