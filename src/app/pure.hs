@@ -30,7 +30,7 @@ foldRose f acc (Node x list) = foldl (foldRose f) (f acc x) list
 --   where newAcc = foldRose f acc y
 
 generateRose :: a -> Int -> (a -> [a]) -> Rose a
-generateRose root 0 fs = Node root []
+generateRose root 0 f = Node root []
 generateRose root depth f = Node root [ generateRose newRoot (depth - 1) f | newRoot <- f root ]
 
 rose = Node 5 [
