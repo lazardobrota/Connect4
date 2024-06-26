@@ -1,6 +1,9 @@
 
 data Rose a = Node a [Rose a] deriving (Eq, Show)
 
+instance Functor Rose where
+  fmap f (Node x list) = Node (f x) [fmap f y | y <- list]
+
 size :: Rose a -> Int
 size (Node _ []) = 1
 size (Node x (y:ys)) = size y + size (Node x ys)
@@ -20,9 +23,10 @@ elemsOnDepth _ (Node x []) = []
 elemsOnDepth num (Node x (y:ys)) = elemsOnDepth (num - 1) y ++ elemsOnDepth num (Node x ys)
 
 foldRose :: (a -> b -> a) -> a -> Rose b -> a
-foldRose f acc (Node x []) = f acc x 
-foldRose f acc (Node x (y:ys)) = foldRose f newAcc (Node x ys)
-  where newAcc = foldRose f acc y
+foldRose f acc (Node x list) = foldl (foldRose f) (f acc x) list
+-- foldRose f acc (Node x []) = f acc x 
+-- foldRose f acc (Node x (y:ys)) = foldRose f newAcc (Node x ys)
+--   where newAcc = foldRose f acc y
 
 rose = Node 5 [
   Node 4 [],
@@ -43,3 +47,5 @@ rose2 = Node 8 [
       Node 1 []
     ]
   ]
+
+rose3 = Node "yoo, " [Node "hi" [Node "how" [], Node "are" []]]
