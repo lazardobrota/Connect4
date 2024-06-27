@@ -1,3 +1,11 @@
+module RoseTree
+( size
+, height
+, leavesCount
+, elemsOnDepth
+, foldRose
+, generateRose
+) where
 
 data Rose a = Node a [Rose a] deriving (Eq, Show)
 
