@@ -1,11 +1,21 @@
 data Piece = Yellow | Red | Empty | OutOfBoard deriving Eq
 data Turn = Player1 | Player2 deriving Eq
 newtype Column a = Column [a] deriving (Eq, Show)
-newtype Board a = Board [[a]] deriving (Eq, Show) --Board [Column] (Head is top, end of list is bottom)
+newtype Board a = Board [[a]] deriving Eq --Board [Column] (Head is top, end of list is bottom)
 
 
 instance Functor Column where
   fmap f (Column list) = Column $ map f list 
+
+instance Show a => Show (Board a) where
+  show (Board columns) = let (Board rows) = transposeBoard (Board columns) in matrixToString rows
+
+matrixToString :: Show a => [[a]] -> String
+matrixToString [] = ""
+matrixToString (x:xs) = rowToString x ++ "\n" ++ matrixToString xs
+
+rowToString:: Show a => [a] -> String
+rowToString  = foldl (\acc x -> acc ++ show x ++ "|") "|"
 
 -- transposeBoard :: Board Piece -> [[Piece]]
 -- transposeBoard (Board ([]:_)) = []
@@ -13,7 +23,7 @@ instance Functor Column where
 --   where headB (Column pieces) = head pieces
 --         tailB (Column pieces) = Column (tail pieces)
 
-transposeBoard :: Board Piece -> Board Piece
+transposeBoard :: Board a -> Board a
 transposeBoard (Board ([]:_)) = Board []
 transposeBoard (Board columns) = Board (transpose columns)
 
