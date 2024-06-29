@@ -30,18 +30,8 @@ matrix = [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]]
 
 -- Check free spaces in matrix
 checkFreeSpaces :: Board Piece -> [(Int, Int)]
-checkFreeSpaces (Board colums) = columnSpaces colums 0
-
-columnSpaces :: [[Piece]] -> Int -> [(Int, Int)]
-columnSpaces columns j
-  | j < length columns = rowSpaces (columns !! j) 0 j ++ columnSpaces columns (j + 1)
-  | otherwise = []
-
-rowSpaces :: [Piece] ->  Int -> Int -> [(Int, Int)]
-rowSpaces row i j
-  | i < length row = [(i, j) | elem == Empty] ++ rowSpaces row (i + 1) j
-  | otherwise = []
-  where elem = row !! i
+checkFreeSpaces board = [ (i, j) |  (j, row) <-columnsWithIndexs, (i, elem) <- row, elem == Empty]
+  where columnsWithIndexs = matrixWithIndexs board
 
 -- Make matrix with indexes, external index is column, internal is row
 matrixWithIndexs :: Board a -> [(Int, [(Int, a)])] 
