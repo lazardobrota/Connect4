@@ -43,6 +43,9 @@ rowSpaces row i j
   | otherwise = []
   where elem = row !! i
 
+-- Make matrix with indexes, external index is column, internal is row
+matrixWithIndexs :: Board a -> [(Int, [(Int, a)])] 
+matrixWithIndexs (Board columns) = zip [0, 1..] (map (zip [0,1 ..] ) columns) 
 
 instance Show Piece where
   show Yellow = "Y"
