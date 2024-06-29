@@ -31,17 +31,42 @@ matrix = [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]]
 -- Check free spaces in matrix
 checkFreeSpaces :: Board Piece -> [(Int, Int)]
 checkFreeSpaces board = [ (i, j) |  (j, row) <-columnsWithIndexs, (i, elem) <- row, elem == Empty]
-  where columnsWithIndexs = matrixWithIndexs board
+  where columnsWithIndexs = matrixWithIndexes board
 
 -- Make matrix with indexes, external index is column, internal is row
-matrixWithIndexs :: Board a -> [(Int, [(Int, a)])] 
-matrixWithIndexs (Board columns) = zip [0, 1..] (map (zip [0,1 ..] ) columns) 
+matrixWithIndexes :: Board a -> [(Int, [(Int, a)])]
+matrixWithIndexes (Board columns) = zip [0, 1..] (map (zip [0,1 ..] ) columns)
+
+listWithIndexes :: [[a]] -> [(Int, [a])]
+listWithIndexes = zip [0, 1..]
+
+-- TODO Update which player is next
+-- move played /*
+movePlayed :: Board Piece -> Int -> Piece -> Board Piece
+movePlayed (Board columns) j piece = Board [ row | (j, row)<- indexColums]
+  where indexColums = modifyColumns (listWithIndexes columns) j piece
+
+modifyColumns :: [(Int, [Piece])] -> Int -> Piece -> [(Int, [Piece])]
+modifyColumns [] _ _ = []
+modifyColumns ((j1, row):xs) j piece
+  | j1 == j = (j1, modifyRow row piece) : xs
+  | otherwise = (j1, row) : modifyColumns xs j piece
+
+modifyRow :: [Piece] -> Piece -> [Piece]
+modifyRow [] _ = []
+modifyRow [elem] _ = [elem]
+modifyRow (elem:x:xs) newElem
+  | elem == Empty && x /= Empty = newElem:x:xs
+  | otherwise = elem : modifyRow (x:xs) newElem
+
+
+-- move played */
 
 instance Show Piece where
   show Yellow = "Y"
   show Red = "R"
   show Empty = " "
 
-test = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] !! 1
+row = [Empty, Empty, Yellow, Red]
 
 -- Za poruke slican tip kao either, ukoliko je nevalidno vraca drugi tip konstruktora sa String porukicom, sledeci Bad >>= odmah vraca taj Bad i samo radimo Show obican za Bad da ispice String
