@@ -1,3 +1,15 @@
+module Board 
+( Piece(..)
+, Board(..)
+, transposeBoard
+, transpose
+, checkFreeSpaces
+, matrixWithIndexes
+, listWithIndexes
+, movePlayed
+, checkIfMovesLeft
+) where
+
 data Piece = Yellow | Red | Empty | OutOfBoard deriving Eq
 newtype Column a = Column [a] deriving (Eq, Show)
 newtype Board a = Board [[a]] deriving Eq --Board [Column] (Head is top, end of list is bottom)
@@ -59,7 +71,8 @@ modifyRow (elem:x:xs) newElem
   | elem == Empty && x /= Empty = newElem:x:xs
   | otherwise = elem : modifyRow (x:xs) newElem
 
-
+checkIfMovesLeft :: Board Piece -> Bool
+checkIfMovesLeft (Board columns) = Empty `elem` [ elem | row <- columns, elem <- row, elem == Empty]
 -- move played */
 
 instance Show Piece where
