@@ -38,6 +38,7 @@ transpose ([]:_) = []
 transpose x = map head x : transpose (map tail x)
 
 board = Board [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]]
+winboard = Board [[Empty, Empty, Yellow, Red], [Yellow, Yellow, Yellow, Yellow]]
 matrix = [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]]
 
 -- Check free spaces in matrix
@@ -53,7 +54,7 @@ listWithIndexes :: [[a]] -> [(Int, [a])]
 listWithIndexes = zip [0, 1..]
 
 -- TODO Update which player is next
--- move played /*
+-- update table on move played /*
 movePlayed :: Board Piece -> Int -> Piece -> Board Piece
 movePlayed (Board columns) j piece = Board [ row | (j, row)<- indexColums]
   where indexColums = modifyColumns (listWithIndexes columns) j piece
@@ -70,11 +71,26 @@ modifyRow [elem] _ = [elem]
 modifyRow (elem:x:xs) newElem
   | elem == Empty && x /= Empty = newElem:x:xs
   | otherwise = elem : modifyRow (x:xs) newElem
+-- update table on move played */
 
+-- end game conditions /*
 checkIfMovesLeft :: Board Piece -> Bool
 checkIfMovesLeft (Board columns) = Empty `elem` [ elem | row <- columns, elem <- row, elem == Empty]
--- move played */
 
+
+checkVerticalWin :: Board Piece -> Bool
+checkVerticalWin (Board columns) = any checkFourInRow columns
+
+checkFourInRow :: [Piece] -> Bool
+checkFourInRow row = any allSame (makeSublistsOfFour row)
+  where allSame [] = False
+        allSame (x:xs) = length (takeWhile (==x) xs) + 1 >= 4
+
+makeSublistsOfFour :: [Piece] -> [[Piece]]
+makeSublistsOfFour [] = []
+makeSublistsOfFour list = take 4 list : makeSublistsOfFour (tail list)
+
+-- end game conditions */
 instance Show Piece where
   show Yellow = "Y"
   show Red = "R"
