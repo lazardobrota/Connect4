@@ -14,6 +14,10 @@ data Piece = Yellow | Red | Empty | OutOfBoard deriving Eq
 newtype Column a = Column [a] deriving (Eq, Show)
 newtype Board a = Board [[a]] deriving Eq --Board [Column] (Head is top, end of list is bottom)
 
+instance Show Piece where
+  show Yellow = "Y"
+  show Red = "R"
+  show Empty = " "
 
 instance Functor Column where
   fmap f (Column list) = Column $ map f list
@@ -38,9 +42,11 @@ transpose ([]:_) = []
 transpose x = map head x : transpose (map tail x)
 
 board = Board [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]]
-winboardv = Board [[Empty, Empty, Yellow, Red], [Yellow, Yellow, Yellow, Yellow]]
+winboardd = Board [[Empty, Empty, Red, Yellow], [Empty, Yellow, Yellow, Red], [Empty, Yellow, Red, Red], [Yellow, Yellow, Red, Yellow]]
+winboardv = Board [[Empty, Empty, Yellow, Red], [Yellow, Yellow, Yellow, Yellow], [Empty, Empty, Yellow, Red]]
 winboardh = Board [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow], [Empty, Empty, Yellow, Red], [Empty, Empty, Yellow, Red]]
 matrix = [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]]
+matrix2 = [[Empty, Empty, Red, Yellow], [Empty, Yellow, Yellow, Red], [Empty, Yellow, Red, Red], [Yellow, Yellow, Red, Yellow]]
 
 -- Check free spaces in matrix
 checkFreeSpaces :: Board Piece -> [(Int, Int)]
@@ -79,6 +85,21 @@ modifyRow (elem:x:xs) newElem
 checkIfMovesLeft :: Board Piece -> Bool
 checkIfMovesLeft (Board columns) = Empty `elem` [ elem | row <- columns, elem <- row, elem == Empty]
 
+-- gets diagonals in this position "/"
+-- gets matrix(transposed matrix) but returns list of diagonals(diagonal also is a list)
+-- stolen from: https://stackoverflow.com/questions/32465776/getting-all-the-diagonals-of-a-matrix-in-haskell
+diagonals :: [[a]] -> [[a]]
+diagonals [] = []
+diagonals ([]:xss) = xss
+diagonals rows = zipWith (++) list1 list2
+  where list1 = map ((:[]) . head) rows ++ repeat []
+        list2 = []:diagonals (map tail rows)
+
+checkDiagonalsWin :: Board Piece -> Bool
+checkDiagonalsWin (Board columns) = any checkFourInRow (diagonals matrix) || any checkFourInRow (diagonals revMatrix)
+  where matrix = transpose columns
+        revMatrix = map reverse matrix
+
 checkVerticalWin :: Board Piece -> Bool
 checkVerticalWin (Board columns) = any checkFourInRow columns
 
@@ -95,11 +116,6 @@ makeSublistsOfFour [] = []
 makeSublistsOfFour list = take 4 list : makeSublistsOfFour (tail list)
 
 -- end game conditions */
-instance Show Piece where
-  show Yellow = "Y"
-  show Red = "R"
-  show Empty = " "
 
-row = [Empty, Empty, Yellow, Red]
 
 -- Za poruke slican tip kao either, ukoliko je nevalidno vraca drugi tip konstruktora sa String porukicom, sledeci Bad >>= odmah vraca taj Bad i samo radimo Show obican za Bad da ispice String
