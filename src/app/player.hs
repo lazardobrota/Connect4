@@ -7,9 +7,11 @@ module Player
 
 import Board
 
-data Turn = Player1 | Player2 deriving Eq
+data Player = Player1 | Player2 deriving (Eq, Show)
 
 newtype GameStateOp s a = GameStateOp {runState :: s -> (Either String a, s)}
+
+data BoardState a =  BoardState { board::Board a, player :: Player} deriving Show
 
 testing :: GameStateOp Int Int
 testing = do
@@ -43,28 +45,37 @@ instance Monad (GameStateOp st) where
 -- push 3 >>= \_ -> pop 
 board1 = Board [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]]
 
+boardState = BoardState {board = Board [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]], player = Player1}
+
 -- TODO it should be red in 63 but current player
-applyMove :: Int -> GameStateOp (Board Piece) Piece
-applyMove column = GameStateOp $ \board@(Board columns) ->
+applyMove :: Int -> GameStateOp (BoardState Piece) Piece
+applyMove column = GameStateOp $ \boardState@(BoardState {board, player}) ->
   case not (checkIfMovesLeft board) || checkWinCon board of
-    True -> (Left "Game already finish", board)
+    True -> (Left "Game already finish", boardState)
     False -> 
-      case column < 0 || length columns <= column of 
-        True -> (Left "Out of bounds", board)
+      case column < 0 || width board <= column of 
+        True -> (Left "Out of bounds", boardState)
         False -> 
           case newBoard == board of
-            True -> (Left "Column is already full", board)
-            False -> (Right Red, newBoard)
-          where newBoard = movePlayed board column Red
+            True -> (Left "Column is already full", boardState)
+            False -> (Right Red, BoardState {board = newBoard, player = switchTurn player})
+          where newBoard = movePlayed board column (playerPiece player)
 
-applyMoves :: GameStateOp (Board Piece) Piece
+applyMoves :: GameStateOp (BoardState Piece) Piece
 applyMoves = do
   applyMove 1
+  applyMove 0
+  applyMove 0
 
-switchTurn :: Turn -> Turn
+playGame = 
+  let (x, state) = runState applyMoves boardState 
+  in case x of Right a -> show $ board state
+               Left err -> err
+
+switchTurn :: Player -> Player
 switchTurn Player1 = Player2
 switchTurn Player2 = Player1
 
-playerPiece :: Turn -> Piece
+playerPiece :: Player -> Piece
 playerPiece Player1 = Red
 playerPiece Player2 = Yellow

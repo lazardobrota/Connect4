@@ -9,6 +9,8 @@ module Board
 , movePlayed
 , checkIfMovesLeft
 , checkWinCon
+, width
+, height
 ) where
 
 data Piece = Yellow | Red | Empty | OutOfBoard deriving Eq
@@ -42,7 +44,13 @@ transpose:: [[a]]->[[a]]
 transpose ([]:_) = []
 transpose x = map head x : transpose (map tail x)
 
-board = Board [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]]
+height :: Board a -> Int
+height (Board columns) = length $ head columns
+
+width :: Board a -> Int
+width (Board columns) = length columns
+
+board2 = Board [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]]
 winboardd = Board [[Empty, Empty, Red, Yellow], [Empty, Yellow, Yellow, Red], [Empty, Yellow, Red, Red], [Yellow, Yellow, Red, Yellow]]
 winboardv = Board [[Empty, Empty, Yellow, Red], [Yellow, Yellow, Yellow, Yellow], [Empty, Empty, Yellow, Red]]
 winboardh = Board [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow], [Empty, Empty, Yellow, Red], [Empty, Empty, Yellow, Red]]
