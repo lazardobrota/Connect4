@@ -3,11 +3,12 @@ module Board
 , Board(..)
 , transposeBoard
 , transpose
-, checkFreeSpaces
+, showFreeSpaces
 , matrixWithIndexes
 , listWithIndexes
 , movePlayed
 , checkIfMovesLeft
+, checkWinCon
 ) where
 
 data Piece = Yellow | Red | Empty | OutOfBoard deriving Eq
@@ -49,8 +50,8 @@ matrix = [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]]
 matrix2 = [[Empty, Empty, Red, Yellow], [Empty, Yellow, Yellow, Red], [Empty, Yellow, Red, Red], [Yellow, Yellow, Red, Yellow]]
 
 -- Check free spaces in matrix
-checkFreeSpaces :: Board Piece -> [(Int, Int)]
-checkFreeSpaces board = [ (i, j) |  (j, row) <-columnsWithIndexs, (i, elem) <- row, elem == Empty]
+showFreeSpaces :: Board Piece -> [(Int, Int)]
+showFreeSpaces board = [ (i, j) |  (j, row) <-columnsWithIndexs, (i, elem) <- row, elem == Empty]
   where columnsWithIndexs = matrixWithIndexes board
 
 -- Make matrix with indexes, external index is column, internal is row
