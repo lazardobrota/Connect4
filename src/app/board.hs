@@ -119,6 +119,3 @@ makeSublistsOfFour [] = []
 makeSublistsOfFour list = take 4 list : makeSublistsOfFour (tail list)
 
 -- end game conditions */
-
-
--- Za poruke slican tip kao either, ukoliko je nevalidno vraca drugi tip konstruktora sa String porukicom, sledeci Bad >>= odmah vraca taj Bad i samo radimo Show obican za Bad da ispice String
