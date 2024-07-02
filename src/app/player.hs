@@ -50,16 +50,11 @@ boardState = BoardState {board = Board [[Empty, Empty, Yellow, Red], [Empty, Yel
 -- TODO it should be red in 63 but current player
 applyMove :: Int -> GameStateOp (BoardState Piece) Piece
 applyMove column = GameStateOp $ \boardState@(BoardState {board, player}) ->
-  case not (checkIfMovesLeft board) || checkWinCon board of
-    True -> (Left "Game already finish", boardState)
-    False -> 
-      case column < 0 || width board <= column of 
-        True -> (Left "Out of bounds", boardState)
-        False -> 
-          case newBoard == board of
-            True -> (Left "Column is already full", boardState)
-            False -> (Right Red, BoardState {board = newBoard, player = switchTurn player})
-          where newBoard = movePlayed board column (playerPiece player)
+  let gameFinish =  if not (checkIfMovesLeft board) || checkWinCon board then (Left "Game already finish", boardState) else outOfBounds
+      outOfBounds = if column < 0 || width board <= column then (Left "Out of bounds", boardState) else columnFull
+      columnFull =  if newBoard == board then (Left "Column is already full", boardState) else (Right Red, BoardState {board = newBoard, player = switchTurn player})
+      newBoard = movePlayed board column (playerPiece player)
+  in  gameFinish
 
 applyMoves :: GameStateOp (BoardState Piece) Piece
 applyMoves = do
@@ -67,8 +62,8 @@ applyMoves = do
   applyMove 0
   applyMove 0
 
-playGame = 
-  let (x, state) = runState applyMoves boardState 
+playGame =
+  let (x, state) = runState applyMoves boardState
   in case x of Right a -> show $ board state
                Left err -> err
 
