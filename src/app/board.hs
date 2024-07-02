@@ -85,6 +85,8 @@ modifyRow (elem:x:xs) newElem
 checkIfMovesLeft :: Board Piece -> Bool
 checkIfMovesLeft (Board columns) = Empty `elem` [ elem | row <- columns, elem <- row, elem == Empty]
 
+checkWinCon :: Board Piece -> Bool
+checkWinCon board = checkDiagonalsWin board || checkVerticalWin board || checkHorizontalWin board
 -- gets diagonals in this position "/"
 -- gets matrix(transposed matrix) but returns list of diagonals(diagonal also is a list)
 -- stolen from: https://stackoverflow.com/questions/32465776/getting-all-the-diagonals-of-a-matrix-in-haskell
