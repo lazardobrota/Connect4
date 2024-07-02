@@ -47,7 +47,6 @@ board1 = Board [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]]
 
 boardState = BoardState {board = Board [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]], player = Player1}
 
--- TODO it should be red in 63 but current player
 applyMove :: Int -> GameStateOp (BoardState Piece) Piece
 applyMove column = GameStateOp $ \boardState@(BoardState {board, player}) ->
   let gameFinish =  if not (checkIfMovesLeft board) || checkWinCon board then (Left "Game already finish", boardState) else outOfBounds

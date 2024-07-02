@@ -69,7 +69,6 @@ matrixWithIndexes (Board columns) = zip [0, 1..] (map (zip [0,1 ..] ) columns)
 listWithIndexes :: [[a]] -> [(Int, [a])]
 listWithIndexes = zip [0, 1..]
 
--- TODO Update which player is next
 -- update table on move played /*
 movePlayed :: Board Piece -> Int -> Piece -> Board Piece
 movePlayed (Board columns) j piece = Board [ row | (j, row)<- indexColums]
@@ -89,7 +88,6 @@ modifyRow (elem:x:xs) newElem
   | otherwise = elem : modifyRow (x:xs) newElem
 -- update table on move played */
 
--- TODO If win condition is met, check which player is currently playing and say that they won
 -- end game conditions /*
 checkIfMovesLeft :: Board Piece -> Bool
 checkIfMovesLeft (Board columns) = Empty `elem` [ elem | row <- columns, elem <- row, elem == Empty]
