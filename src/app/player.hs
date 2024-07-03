@@ -1,7 +1,8 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use if" #-}
 module Player
-( switchTurn
+( Player(..)
+, switchTurn
 , playerPiece
 ) where
 
@@ -95,7 +96,6 @@ isValidNum :: String -> Bool
 isValidNum num =  case rm num of Just a -> True
                                  _      -> False
 
--- TODO ask if player want to read board from file(this ISN'T done) or create a new one(this is already done)
 -- IO /*
 startGame :: IO ()
 startGame = do
