@@ -7,6 +7,7 @@ module Player
 
 import Board
 import Control.Exception (throw)
+import Distribution.Compat.Prelude (readMaybe)
 
 data Player = Player1 | Player2 deriving (Eq, Show)
 
@@ -46,7 +47,7 @@ instance Monad (GameStateOp st) where
 -- push 3 >>= \_ -> pop 
 board1 = Board [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]]
 
-boardState = BoardState {board = Board [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]], player = Player1}
+boardState2 = BoardState {board = Board [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]], player = Player1}
 
 applyMove :: Int -> GameStateOp (BoardState Piece) Piece
 applyMove column = GameStateOp $ \boardState@(BoardState {board, player}) ->
@@ -69,12 +70,12 @@ applyMovesFromList (x:xs) = do
   applyMovesFromList xs
 
 playGame =
-  let (x, state) = runState applyMoves boardState
+  let (x, state) = runState applyMoves boardState2
   in case x of Right a -> show $ board state
                Left err -> err
 
 playGame2 list =
-  let (x, state) = runState (applyMovesFromList list) boardState
+  let (x, state) = runState (applyMovesFromList list) boardState2
   in case x of Right a -> show $ board state
                Left err -> err
 -- putStrLn $ playGame2 [1, 0, 0]
@@ -86,3 +87,53 @@ switchTurn Player2 = Player1
 playerPiece :: Player -> Piece
 playerPiece Player1 = Red
 playerPiece Player2 = Yellow
+
+rm :: String -> Maybe Int
+rm = readMaybe
+
+isValidNum :: String -> Bool
+isValidNum num =  case rm num of Just a -> True
+                                 _      -> False
+
+-- TODO ask if player want to read board from file(this ISN'T done) or create a new one(this is already done)
+startGame :: IO ()
+startGame = do
+  putStrLn "Enter width od table bigger then 0"
+  w <- getLine
+  putStrLn "Enter height od table bigger then 0"
+  h <- getLine
+  if isValidNum w && isValidNum h && read w > 0 && read h > 0 then
+    updateGame $ BoardState {board = createBoard (read w) (read h), player = Player1}
+  else do
+    putStrLn "Invalid input"
+    startGame
+
+updateGame :: BoardState Piece -> IO()
+updateGame boardState = do
+  putStrLn "Choose option with number"
+  putStrLn "1) Play normal"
+  putStrLn "2) Play multiple rounds at once"
+  numStr <- getLine
+  let num = read numStr in
+    if num == 1 then do
+      playInfRound boardState
+    else do
+      updateGame boardState
+
+
+playInfRound :: BoardState Piece -> IO()
+playInfRound boardState = do
+  putStrLn "Choose column"
+  numStr <- getLine
+  let newGameState = playRound (read numStr) boardState in do
+    putStrLn $ printMove newGameState
+    playInfRound $ snd newGameState
+
+
+printMove :: (Either String Piece, BoardState Piece) -> String
+printMove (x, boardState) = case x of Right a -> show $ board boardState
+                                      Left err -> err
+
+playRound :: Int -> BoardState Piece -> (Either String Piece, BoardState Piece)
+playRound column = runState (applyMove column)
+
