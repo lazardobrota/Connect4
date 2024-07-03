@@ -8,7 +8,8 @@ module Player
 import Board
 import Control.Exception (throw)
 import Distribution.Compat.Prelude (readMaybe)
-import Text.Parsec (Parsec, many1, oneOf, parse, newline)
+import Text.Parsec
+    ( Parsec, many1, oneOf, parse, newline, many, digit )
 import Text.Parsec.Char (char)
 
 data Player = Player1 | Player2 deriving (Eq, Show)
@@ -95,18 +96,26 @@ isValidNum num =  case rm num of Just a -> True
                                  _      -> False
 
 -- TODO ask if player want to read board from file(this ISN'T done) or create a new one(this is already done)
+-- IO /*
 startGame :: IO ()
 startGame = do
-  putStrLn "Welcome to Connect 4"
-  putStrLn "Enter width od board bigger then 0"
-  w <- getLine
-  putStrLn "Enter height od board bigger then 0"
-  h <- getLine
-  if isValidNum w && isValidNum h && read w > 0 && read h > 0 then
-    updateGame $ BoardState {board = createBoard (read w) (read h), player = Player1}
-  else do
-    putStrLn "Invalid input"
-    startGame
+  putStrLn "Welcome to Connect 4, choose using numbers"
+  putStrLn "1) Create new board"
+  putStrLn "2) Use existing board from matrix.txt"
+  numStr <- getLine
+
+  if read numStr == 1 then do
+    putStrLn "Enter width od board bigger then 0"
+    w <- getLine
+    putStrLn "Enter height od board bigger then 0"
+    h <- getLine
+    if isValidNum w && isValidNum h && read w > 0 && read h > 0 then
+      updateGame $ BoardState {board = createBoard (read w) (read h), player = Player1}
+    else do
+      putStrLn "Invalid input"
+      startGame
+    else do
+      readBoardFromFile
 
 updateGame :: BoardState Piece -> IO()
 updateGame boardState = do
@@ -120,11 +129,7 @@ updateGame boardState = do
     else do
       addListBeforePlay boardState
 
-addListBeforePlay :: BoardState Piece -> IO ()
-addListBeforePlay boardState = do
-  putStrLn "Write all column indexes seperated by space"
-
-
+  -- 1) /*
 playInfRound :: BoardState Piece -> IO()
 playInfRound boardState = do
   putStrLn "Choose column or \"exit\" to start new game"
@@ -135,6 +140,28 @@ playInfRound boardState = do
       playInfRound $ snd newGameState
   else
     startGame
+  -- 1) */
+
+  -- 2) /*
+addListBeforePlay :: BoardState Piece -> IO ()
+addListBeforePlay boardState = do
+  putStrLn "Write all column indexes seperated by space"
+
+prebuildBoard :: (Either String Piece, BoardState Piece) -> IO()
+prebuildBoard newGameState = do
+  putStrLn $ printMove newGameState
+  playInfRound $ snd newGameState
+
+readBoardFromFile = do
+  contents <- readFile "../matrix.txt"
+  if null contents then
+    return ()
+    else do
+      case parse calc "" contents of 
+        Right (board, list) -> let boardState = BoardState { board = board, player = Player1 } 
+                               in  prebuildBoard (runState (applyMovesFromList list) boardState)
+        Left err    -> print err
+  -- 2) */
 
 
 printMove :: (Either String Piece, BoardState Piece) -> String
@@ -143,7 +170,7 @@ printMove (x, boardState) = case x of Right a -> show $ board boardState
 
 playRound :: Int -> BoardState Piece -> (Either String Piece, BoardState Piece)
 playRound column = runState (applyMove column)
-
+-- IO */
 
 pieceParser :: Parsec String () Piece
 pieceParser = do
@@ -164,15 +191,19 @@ rowParser = do
 matrixParser :: Parsec String () [[Piece]]
 matrixParser = many1 rowParser
 
-
-calc :: Parsec String () (Board Piece)
-calc = do
-  matrix <- matrixParser 
+boardParser :: Parsec String () (Board Piece)
+boardParser = do
+  matrix <- matrixParser
   return (Board $ transpose matrix)
 
-mainParse = do
-  contents <- readFile "../matrix.txt"
-  if null contents then 
-    return ()
-    else do case parse calc "" contents of Right board -> print board
-                                           Left err    -> print err 
+listParser :: Parsec String () Int
+listParser = do
+  num <- many1 digit
+  newline
+  return (read num)
+
+calc :: Parsec String () (Board Piece, [Int])
+calc = do
+  board <- boardParser
+  list <- many listParser
+  return (board, list)
