@@ -51,12 +51,14 @@ height (Board columns) = length $ head columns
 width :: Board a -> Int
 width (Board columns) = length columns
 
+boarde = Board [[Empty, Empty, Empty, Empty], [Empty, Empty, Empty, Empty]]
 board2 = Board [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]]
 winboardd = Board [[Empty, Empty, Red, Yellow], [Empty, Yellow, Yellow, Red], [Empty, Yellow, Red, Red], [Yellow, Yellow, Red, Yellow]]
 winboardv = Board [[Empty, Empty, Yellow, Red], [Yellow, Yellow, Yellow, Yellow], [Empty, Empty, Yellow, Red]]
 winboardh = Board [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow], [Empty, Empty, Yellow, Red], [Empty, Empty, Yellow, Red]]
 matrix = [[Empty, Empty, Yellow, Red], [Empty, Yellow, Yellow, Yellow]]
 matrix2 = [[Empty, Empty, Red, Yellow], [Empty, Yellow, Yellow, Red], [Empty, Yellow, Red, Red], [Yellow, Yellow, Red, Yellow]]
+matrixe = [[Empty, Empty, Empty, Empty], [Empty, Empty, Empty, Empty]]
 
 -- Check free spaces in matrix
 showFreeSpaces :: Board Piece -> [(Int, Int)]
@@ -77,16 +79,16 @@ movePlayed (Board columns) j piece = Board [ row | (j, row)<- indexColums]
 
 modifyColumns :: [(Int, [Piece])] -> Int -> Piece -> [(Int, [Piece])]
 modifyColumns [] _ _ = []
-modifyColumns ((j1, row):xs) j piece
-  | j1 == j = (j1, modifyRow row piece) : xs
-  | otherwise = (j1, row) : modifyColumns xs j piece
+modifyColumns ((j1, column):xs) j piece
+  | j1 == j = (j1, modifyOneColumn column piece) : xs
+  | otherwise = (j1, column) : modifyColumns xs j piece
 
-modifyRow :: [Piece] -> Piece -> [Piece]
-modifyRow [] _ = []
-modifyRow [elem] _ = [elem]
-modifyRow (elem:x:xs) newElem
+modifyOneColumn :: [Piece] -> Piece -> [Piece]
+modifyOneColumn [] _ = []
+modifyOneColumn [elem] newElem = [newElem]
+modifyOneColumn (elem:x:xs) newElem
   | elem == Empty && x /= Empty = newElem:x:xs
-  | otherwise = elem : modifyRow (x:xs) newElem
+  | otherwise = elem : modifyOneColumn (x:xs) newElem
 -- update table on move played */
 
 -- end game conditions /*
