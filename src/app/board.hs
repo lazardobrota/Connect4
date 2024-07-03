@@ -11,6 +11,7 @@ module Board
 , checkWinCon
 , width
 , height
+, createBoard
 ) where
 
 data Piece = Yellow | Red | Empty | OutOfBoard deriving Eq
@@ -125,3 +126,7 @@ makeSublistsOfFour [] = []
 makeSublistsOfFour list = take 4 list : makeSublistsOfFour (tail list)
 
 -- end game conditions */
+
+
+createBoard :: Int -> Int -> Board Piece
+createBoard w h = Board $ replicate w (replicate h Empty)
