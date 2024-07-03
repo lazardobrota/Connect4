@@ -8,6 +8,8 @@ module Player
 import Board
 import Control.Exception (throw)
 import Distribution.Compat.Prelude (readMaybe)
+import Text.Parsec (Parsec, many1, oneOf, parse, newline)
+import Text.Parsec.Char (char)
 
 data Player = Player1 | Player2 deriving (Eq, Show)
 
@@ -15,10 +17,6 @@ newtype GameStateOp s a = GameStateOp {runState :: s -> (Either String a, s)}
 
 data BoardState a =  BoardState { board::Board a, player :: Player} deriving Show
 
-testing :: GameStateOp Int Int
-testing = do
-   a <- pure 5
-   return a
 
 -- runState (pure 5 >>= \s -> pure 3) 6
 -- runState (pure 5 >> pure 3) 6
@@ -64,6 +62,7 @@ applyMoves = do
   applyMove 0
 
 applyMovesFromList :: [Int] -> GameStateOp (BoardState Piece) Piece
+applyMovesFromList [] = applyMove (-1) --instead of throwing error
 applyMovesFromList [xs] = applyMove xs
 applyMovesFromList (x:xs) = do
   applyMove x
@@ -119,14 +118,18 @@ updateGame boardState = do
     if num == 1 then do
       playInfRound boardState
     else do
-      updateGame boardState
+      addListBeforePlay boardState
+
+addListBeforePlay :: BoardState Piece -> IO ()
+addListBeforePlay boardState = do
+  putStrLn "Write all column indexes seperated by space"
 
 
 playInfRound :: BoardState Piece -> IO()
 playInfRound boardState = do
   putStrLn "Choose column or \"exit\" to start new game"
   str <- getLine
-  if (isValidNum str) then 
+  if isValidNum str then
     let newGameState = playRound (read str) boardState in do
       putStrLn $ printMove newGameState
       playInfRound $ snd newGameState
@@ -141,3 +144,35 @@ printMove (x, boardState) = case x of Right a -> show $ board boardState
 playRound :: Int -> BoardState Piece -> (Either String Piece, BoardState Piece)
 playRound column = runState (applyMove column)
 
+
+pieceParser :: Parsec String () Piece
+pieceParser = do
+  letter <- oneOf " RY"
+  char '|'
+  case letter of ' ' -> return Empty
+                 'R' -> return Red
+                 'Y' -> return Yellow
+
+
+rowParser :: Parsec String () [Piece]
+rowParser = do
+  char '|'
+  row <- many1 pieceParser
+  newline
+  return row
+
+matrixParser :: Parsec String () [[Piece]]
+matrixParser = many1 rowParser
+
+
+calc :: Parsec String () (Board Piece)
+calc = do
+  matrix <- matrixParser 
+  return (Board matrix)
+
+mainParse = do
+  line <- getLine
+  if null line then 
+    return ()
+    else do case parse calc "" line of Right x -> print x
+                                       Left err -> print err 
