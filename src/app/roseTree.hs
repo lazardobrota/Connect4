@@ -49,27 +49,33 @@ generatePaths :: Board Piece -> Int -> Rose (Board Piece)
 generatePaths board depth = makeAllPaths (Node board []) depth Player1
 
 makeAllPaths :: Rose (Board Piece) -> Int -> Player -> Rose (Board Piece)
-makeAllPaths rose 0 _ = rose 
-makeAllPaths (Node board@(Board columns) list) depth player = Node board [makeAllPaths (makeRose board j player) (depth - 1) (switchTurn player) | j <- [0..width board - 1] ]
+makeAllPaths rose 0 _ = rose
+makeAllPaths rose@(Node board@(Board columns) list) depth player =
+  if checkWinCon board then 
+    rose 
+  else 
+    Node board 
+    [makeAllPaths (makeRose board j player) (depth - 1) (switchTurn player) |
+    j <- [0..width board - 1], let (Node newBoard xs) = makeRose board j player in newBoard /= board ]
   where makeRose board j player = Node (movePlayed board j (playerPiece player)) []
 
-board2 = Board [[Empty, Empty, Yellow, Red], [Empty, Red, Yellow, Yellow]]
+board2 = Board [[Empty, Empty, Red, Red], [Empty, Red, Yellow, Yellow], [Empty, Red, Yellow, Yellow], [Empty, Red, Yellow, Yellow]]
 
 rose = Node 5 [
   Node 4 [],
-  Node 3 [], 
+  Node 3 [],
   Node 2 []
   ]
 
 rose2 = Node 8 [
     Node 4 [
         Node 5 [
-          Node 6 [], 
+          Node 6 [],
           Node 9 []
         ],
         Node 7 []
     ],
-    Node 3 [], 
+    Node 3 [],
     Node 2 [
       Node 1 []
     ]
