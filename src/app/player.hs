@@ -98,9 +98,10 @@ isValidNum num =  case rm num of Just a -> True
 -- TODO ask if player want to read board from file(this ISN'T done) or create a new one(this is already done)
 startGame :: IO ()
 startGame = do
-  putStrLn "Enter width od table bigger then 0"
+  putStrLn "Welcome to Connect 4"
+  putStrLn "Enter width od board bigger then 0"
   w <- getLine
-  putStrLn "Enter height od table bigger then 0"
+  putStrLn "Enter height od board bigger then 0"
   h <- getLine
   if isValidNum w && isValidNum h && read w > 0 && read h > 0 then
     updateGame $ BoardState {board = createBoard (read w) (read h), player = Player1}
@@ -123,11 +124,14 @@ updateGame boardState = do
 
 playInfRound :: BoardState Piece -> IO()
 playInfRound boardState = do
-  putStrLn "Choose column"
-  numStr <- getLine
-  let newGameState = playRound (read numStr) boardState in do
-    putStrLn $ printMove newGameState
-    playInfRound $ snd newGameState
+  putStrLn "Choose column or \"exit\" to start new game"
+  str <- getLine
+  if (isValidNum str) then 
+    let newGameState = playRound (read str) boardState in do
+      putStrLn $ printMove newGameState
+      playInfRound $ snd newGameState
+  else
+    startGame
 
 
 printMove :: (Either String Piece, BoardState Piece) -> String
