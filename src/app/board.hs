@@ -85,7 +85,9 @@ modifyColumns ((j1, column):xs) j piece
 
 modifyOneColumn :: [Piece] -> Piece -> [Piece]
 modifyOneColumn [] _ = []
-modifyOneColumn [elem] newElem = [newElem]
+modifyOneColumn [elem] newElem 
+  | elem == Empty = [newElem]
+  | otherwise = [elem]
 modifyOneColumn (elem:x:xs) newElem
   | elem == Empty && x /= Empty = newElem:x:xs
   | otherwise = elem : modifyOneColumn (x:xs) newElem
