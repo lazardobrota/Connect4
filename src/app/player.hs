@@ -6,6 +6,7 @@ module Player
 ) where
 
 import Board
+import Control.Exception (throw)
 
 data Player = Player1 | Player2 deriving (Eq, Show)
 
@@ -49,11 +50,11 @@ boardState = BoardState {board = Board [[Empty, Empty, Yellow, Red], [Empty, Yel
 
 applyMove :: Int -> GameStateOp (BoardState Piece) Piece
 applyMove column = GameStateOp $ \boardState@(BoardState {board, player}) ->
-  let gameFinish =  if not (checkIfMovesLeft board) || checkWinCon board then (Left "Game already finish", boardState) else outOfBounds
+  let gameFinished =  if not (checkIfMovesLeft board) || checkWinCon board then (Left "Game already finish", boardState) else outOfBounds
       outOfBounds = if column < 0 || width board <= column then (Left "Out of bounds", boardState) else columnFull
       columnFull =  if newBoard == board then (Left "Column is already full", boardState) else (Right Red, BoardState {board = newBoard, player = switchTurn player})
       newBoard = movePlayed board column (playerPiece player)
-  in  gameFinish
+  in  gameFinished
 
 applyMoves :: GameStateOp (BoardState Piece) Piece
 applyMoves = do
@@ -61,10 +62,22 @@ applyMoves = do
   applyMove 0
   applyMove 0
 
+applyMovesFromList :: [Int] -> GameStateOp (BoardState Piece) Piece
+applyMovesFromList [xs] = applyMove xs
+applyMovesFromList (x:xs) = do
+  applyMove x
+  applyMovesFromList xs
+
 playGame =
   let (x, state) = runState applyMoves boardState
   in case x of Right a -> show $ board state
                Left err -> err
+
+playGame2 list =
+  let (x, state) = runState (applyMovesFromList list) boardState
+  in case x of Right a -> show $ board state
+               Left err -> err
+-- putStrLn $ playGame2 [1, 0, 0]
 
 switchTurn :: Player -> Player
 switchTurn Player1 = Player2
