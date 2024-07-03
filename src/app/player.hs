@@ -168,11 +168,11 @@ matrixParser = many1 rowParser
 calc :: Parsec String () (Board Piece)
 calc = do
   matrix <- matrixParser 
-  return (Board matrix)
+  return (Board $ transpose matrix)
 
 mainParse = do
-  line <- getLine
-  if null line then 
+  contents <- readFile "../matrix.txt"
+  if null contents then 
     return ()
-    else do case parse calc "" line of Right x -> print x
-                                       Left err -> print err 
+    else do case parse calc "" contents of Right board -> print board
+                                           Left err    -> print err 
