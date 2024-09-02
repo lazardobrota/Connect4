@@ -29,6 +29,18 @@ startGame
 ```
 </p>
 
+## Project description
+<p>
+  
+  Player can make their own board with length and height. They choose if they want to do it in terminal or if they want to load it from a file. <br/> 
+  Game after that start and players choose column by writing number of column.
+  
+  ![image](https://github.com/user-attachments/assets/5010280b-4b58-4317-a56d-f16010355e9d)
+
+
+
+</p>
+
 ## Features & Technologies 
 #### <ins>Backend:</ins>
 <p>
