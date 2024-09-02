@@ -145,7 +145,7 @@ playInfRound boardState = do
   -- 2) /*
 addListBeforePlay :: BoardState Piece -> IO ()
 addListBeforePlay boardState = do
-  putStrLn "Write all column indexes seperated by space"
+  putStrLn "Work in progress"
 
 prebuildBoard :: (Either String Piece, BoardState Piece) -> IO()
 prebuildBoard newGameState = do
